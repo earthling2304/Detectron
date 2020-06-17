@@ -201,7 +201,22 @@ _DATASETS = {
             _DATA_DIR + '/VOC2012/annotations/voc_2012_val.json',
         _DEVKIT_DIR:
             _DATA_DIR + '/VOC2012/VOCdevkit2012'
+    },
+    'visdrone_data' : {
+        _IM_DIR:
+            _DATA_DIR + '/Visdrone/VisDrone2019-DET-train/images',
+        _ANN_FN:
+            _DATA_DIR + '/Visdrone/VisDrone2019-DET-train/coco_format_annotations/cluster_CPNet.json',
+
+    },
+    'visdrone_val': {
+        _IM_DIR:
+            _DATA_DIR + '/Visdrone/VisDrone2019-DET-val/images',
+        _ANN_FN:
+            _DATA_DIR + '/Visdrone/VisDrone2019-DET-val/coco_format_annotations/cluster_CPNet.json',
+
     }
+
 }
 
 
