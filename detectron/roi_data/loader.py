@@ -96,6 +96,7 @@ class RoIDataLoader(object):
 
     def minibatch_loader_thread(self):
         """Load mini-batches and put them onto the mini-batch queue."""
+        print("MINIBATCH LOADER THREAD START")
         with self.coordinator.stop_on_exception():
             while not self.coordinator.should_stop():
                 blobs = self.get_next_minibatch()
@@ -114,6 +115,8 @@ class RoIDataLoader(object):
 
     def enqueue_blobs_thread(self, gpu_id, blob_names):
         """Transfer mini-batches from a mini-batch queue to a BlobsQueue."""
+        print("ENQUEUE BLOBS THREAD START")
+
         with self.coordinator.stop_on_exception():
             while not self.coordinator.should_stop():
                 if self._minibatch_queue.qsize == 0:
@@ -127,6 +130,8 @@ class RoIDataLoader(object):
 
     def get_next_minibatch(self):
         """Return the blobs to be used for the next minibatch. Thread safe."""
+        print("GET NEXT MINIBATH START")
+
         valid = False
         while not valid:
             db_inds = self._get_next_minibatch_inds()
@@ -160,7 +165,10 @@ class RoIDataLoader(object):
         self._perm = deque(self._perm)
         self._cur = 0
 
+
     def _get_next_minibatch_inds(self):
+        print("GET NEXT MINIBATCH INDS START")
+
         """Return the roidb indices for the next minibatch. Thread safe."""
         with self._lock:
             # We use a deque and always take the *first* IMS_PER_BATCH items
@@ -175,9 +183,13 @@ class RoIDataLoader(object):
         return db_inds
 
     def get_output_names(self):
+        print("GET OUTPUT NAMES START")
+
         return self._output_names
 
     def enqueue_blobs(self, gpu_id, blob_names, blobs):
+        print("ENQUEUE BLOBS START")
+
         """Put a mini-batch on a BlobsQueue."""
         assert len(blob_names) == len(blobs)
         t = time.time()
@@ -203,6 +215,8 @@ class RoIDataLoader(object):
         )
 
     def create_threads(self):
+        print("CREATE THREADS START")
+
         # Create mini-batch loader threads, each of which builds mini-batches
         # and places them into a queue in CPU memory
         self._workers = [
@@ -223,6 +237,8 @@ class RoIDataLoader(object):
         ]
 
     def start(self, prefill=False):
+        print("START START")
+
         for w in self._workers + self._enqueuers:
             w.setDaemon(True)
             w.start()
@@ -242,9 +258,13 @@ class RoIDataLoader(object):
                     break
 
     def has_stopped(self):
+        print("HAS STOPPED START")
+
         return self.coordinator.should_stop()
 
     def shutdown(self):
+        print("SHUTDOWN START")
+
         self.coordinator.request_stop()
         self.coordinator.wait_for_stop()
         self.close_blobs_queues()
@@ -252,6 +272,8 @@ class RoIDataLoader(object):
             w.join()
 
     def create_blobs_queues(self):
+        print("CREATE BLOBS QUEUES START")
+
         """Create one BlobsQueue for each GPU to hold mini-batches."""
         for gpu_id in range(self._num_gpus):
             with c2_utils.GpuNameScope(gpu_id):
@@ -265,6 +287,8 @@ class RoIDataLoader(object):
         return self.create_enqueue_blobs()
 
     def close_blobs_queues(self):
+        print("CLOSE BLOBS QUEUES START")
+
         """Close a BlobsQueue."""
         for gpu_id in range(self._num_gpus):
             with core.NameScope('gpu_{}'.format(gpu_id)):
@@ -275,6 +299,8 @@ class RoIDataLoader(object):
                 )
 
     def create_enqueue_blobs(self):
+        print("CREATE ENQUEUE BLOBS START")
+
         blob_names = self.get_output_names()
         enqueue_blob_names = [
             '{}_enqueue_{}'.format(b, self._loader_id) for b in blob_names
@@ -286,6 +312,8 @@ class RoIDataLoader(object):
         return enqueue_blob_names
 
     def register_sigint_handler(self):
+        print("REGISTER SIGINT HANDLER START")
+
         def signal_handler(signal, frame):
             logger.info(
                 'SIGINT: Shutting down RoIDataLoader threads and exiting...'
